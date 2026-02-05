@@ -81,7 +81,13 @@ app.get('/api/geo/reverse', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`WeatherApp server running at http://localhost:${PORT}`);
-    console.log('API key is secured on the server side');
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`WeatherApp server running at http://localhost:${PORT}`);
+        console.log('API key is secured on the server side');
+    });
+}
+
+// Export for Vercel
+module.exports = app;

@@ -185,13 +185,80 @@ bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-lg
 
 ---
 
+## 13. Backend Proxy for API Security
+
+**User Concern:** API key exposed in browser JavaScript is a security problem
+
+**Solution:** Created Node.js/Express backend proxy to keep API key server-side
+
+**New files created:**
+
+- `server.js` - Express server with proxy endpoints
+- `package.json` - Node.js dependencies (express, cors)
+- `.env.example` - Template for environment variables
+
+**Proxy endpoints:**
+
+- `/api/weather` - Proxies weather data requests
+- `/api/geo/direct` - Proxies city search (geocoding)
+- `/api/geo/reverse` - Proxies coordinates to city name
+
+**Changes to `app.js`:**
+
+- Updated all API calls to use local proxy endpoints instead of direct OpenWeatherMap URLs
+- Removed dependency on `config.js`
+
+**Changes to `index.html`:**
+
+- Removed `<script src="config.js">` reference
+
+---
+
+## 14. Environment Variable Configuration
+
+**User Request:** Move API key to environment variable
+
+**Changes to `server.js`:**
+
+- API key now required via `process.env.OPENWEATHERMAP_API_KEY`
+- Server exits with error if environment variable not set
+- Removed hardcoded fallback key
+
+**Running the server:**
+
+```bash
+export OPENWEATHERMAP_API_KEY='your_key_here'
+npm start
+```
+
+---
+
+## 15. GitHub Deployment
+
+**User Request:** Push app to GitHub
+
+**Actions:**
+
+- Initialized git repository
+- Renamed default branch to `main`
+- Added `.pdf` files to `.gitignore`
+- Created initial commit with all project files
+- Created public GitHub repository: `lewtucker/WeatherApp5`
+- Pushed code to GitHub
+
+**Repository URL:** <https://github.com/lewtucker/WeatherApp5>
+
+---
+
 ## Final Project Structure
 
-```
+```text
 WeatherApp5/
 |-- index.html      # Main page with UI and city selection modal
-|-- app.js          # Application logic (weather, map, POI, geocoding)
-|-- config.js       # API key (gitignored)
+|-- app.js          # Frontend application logic
+|-- server.js       # Backend proxy server (holds API key)
+|-- package.json    # Node.js dependencies
+|-- .env.example    # Environment variable template
 |-- .gitignore      # Git ignore rules
 |-- CLAUDE.md       # Claude Code guidance
 |-- README.md       # Project documentation
@@ -203,7 +270,8 @@ WeatherApp5/
 
 ## Technologies Used
 
-- HTML5 / CSS3 / JavaScript (vanilla)
+- HTML5 / CSS3 / JavaScript (frontend)
+- Node.js / Express (backend proxy)
 - Tailwind CSS (CDN)
 - Leaflet.js (maps)
 - OpenWeatherMap API (weather + geocoding)
