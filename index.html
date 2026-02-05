@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherApp - Weather & Points of Interest</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        #map { height: 400px; }
+        .weather-icon { width: 80px; height: 80px; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600 mb-2">WeatherApp</h1>
+            <p class="text-gray-600">Find weather and points of interest for any city</p>
+        </header>
+
+        <!-- City Search -->
+        <section class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="flex gap-4">
+                <input
+                    type="text"
+                    id="cityInput"
+                    placeholder="Enter city name..."
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                >
+                <button
+                    id="searchBtn"
+                    class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Search
+                </button>
+                <button
+                    id="locationBtn"
+                    class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    title="Use my location"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Weather Display -->
+        <section id="weatherSection" class="bg-white rounded-xl shadow-md p-6 mb-6 hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4" id="cityName">--</h2>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img id="weatherIcon" class="weather-icon" src="" alt="Weather icon">
+                    <div>
+                        <p class="text-5xl font-bold text-gray-800" id="temperature">--°F</p>
+                        <p class="text-xl text-gray-600 capitalize" id="description">--</p>
+                    </div>
+                </div>
+                <div class="text-right text-gray-600">
+                    <p><span class="font-medium">Humidity:</span> <span id="humidity">--</span>%</p>
+                    <p><span class="font-medium">Wind:</span> <span id="wind">--</span> mph</p>
+                    <p><span class="font-medium">Feels like:</span> <span id="feelsLike">--</span>°F</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map and POI Container -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Map Section -->
+            <section class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-800">Map</h2>
+                    <button id="openGoogleMaps" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2" onclick="openInGoogleMaps()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd" />
+                        </svg>
+                        Open in Google Maps
+                    </button>
+                </div>
+                <div id="map" class="rounded-lg overflow-hidden"></div>
+            </section>
+
+            <!-- POI Section -->
+            <section class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Points of Interest</h2>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button class="poi-btn px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm" data-poi="restaurant">
+                        🍽️ Restaurants
+                    </button>
+                    <button class="poi-btn px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm" data-poi="park">
+                        🌳 Parks
+                    </button>
+                    <button class="poi-btn px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm" data-poi="shop">
+                        🛍️ Shopping
+                    </button>
+                    <button class="poi-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm" data-poi="hotel">
+                        🏨 Hotels
+                    </button>
+                </div>
+                <div id="poiResults" class="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
+                    <p class="text-gray-500 text-center py-8">Search for a city and select a category to find points of interest</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- City Selection Modal -->
+    <div id="cityModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center" style="z-index: 10000;">
+        <div class="bg-white rounded-xl shadow-xl p-6 m-4 max-w-md w-full max-h-96 overflow-y-auto">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Select a city</h3>
+            <p class="text-gray-600 mb-4">Multiple cities found. Please select the one you're looking for:</p>
+            <div id="cityOptions" class="space-y-2"></div>
+            <button id="cancelCitySelect" class="mt-4 w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Main App -->
+    <script src="app.js"></script>
+</body>
+</html>
