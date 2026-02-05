@@ -2,7 +2,7 @@
 
 This document records the development session for WeatherApp5.
 
-## Session Date: February 3, 2026
+## Session Date: February 3-4, 2026
 
 ---
 
@@ -250,6 +250,87 @@ npm start
 
 ---
 
+## 16. Vercel Deployment
+
+**User Request:** Deploy the app to Vercel
+
+**New files created:**
+
+- `vercel.json` - Vercel deployment configuration
+
+**Initial configuration:**
+
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "server.js" }
+  ]
+}
+```
+
+**Environment variable configured:**
+
+- Added `OPENWEATHERMAP_API_KEY` in Vercel project settings
+
+**Deployment URL:** <https://weatherapp5.vercel.app>
+
+---
+
+## 17. Vercel Deployment Fix
+
+**User Report:** "Cannot GET" error when accessing deployed app
+
+**Problem:** Vercel serverless functions require the Express app to be exported as a module, not started with `app.listen()`
+
+**Changes to `server.js`:**
+
+- Added conditional to only call `app.listen()` in non-production environment
+- Added `module.exports = app` to export the Express app for Vercel
+
+```javascript
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`WeatherApp server running at http://localhost:${PORT}`);
+        console.log('API key is secured on the server side');
+    });
+}
+
+// Export for Vercel
+module.exports = app;
+```
+
+**Changes to `vercel.json`:**
+
+- Added builds for static files (`index.html`, `app.js`)
+- Added routes to properly serve static files and API endpoints
+
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "app.js", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "server.js" },
+    { "src": "/app.js", "dest": "app.js" },
+    { "src": "/(.*)", "dest": "index.html" }
+  ]
+}
+```
+
+**Changes to `.gitignore`:**
+
+- Added `.vercel` directory to ignore Vercel local files
+
+---
+
 ## Final Project Structure
 
 ```text
@@ -257,6 +338,7 @@ WeatherApp5/
 |-- index.html      # Main page with UI and city selection modal
 |-- app.js          # Frontend application logic
 |-- server.js       # Backend proxy server (holds API key)
+|-- vercel.json     # Vercel deployment configuration
 |-- package.json    # Node.js dependencies
 |-- .env.example    # Environment variable template
 |-- .gitignore      # Git ignore rules
@@ -277,3 +359,4 @@ WeatherApp5/
 - OpenWeatherMap API (weather + geocoding)
 - OpenStreetMap (map tiles)
 - Overpass API (points of interest)
+- Vercel (serverless deployment)
