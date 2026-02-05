@@ -8,3 +8,4 @@ Technology stack might include HTML/CSS and Javascript, OpenWeatherMap, leaflet,
 Write out a CLAUD.MD file, keep a transcript in Transcript.md, and write a README.md to contain instructions for running the app.
 
 Also, enable this for creating a repository on Github.
+Finally, show how to run the app
